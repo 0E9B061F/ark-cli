@@ -9,13 +9,17 @@ task :console do
   IRB.start
 end
 
+version = `git describe --tags`.strip.tr('-', '.')
+
 spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
-  s.name = 's25-cli'
-  s.version = 0.1
-  s.summary = "Simple commandline interface for handling options"
-	s.authors = "Macquarie Sharpless"
-	s.email = "macquarie.sharpless@gmail.com"
+  s.name     = 's25-cli'
+  s.version  = version
+	s.license  = 'GPL-3.0'
+  s.summary  = "Simple commandline interface for handling options"
+	s.authors  = "Macquarie Sharpless"
+	s.email    = "macquarie.sharpless@gmail.com"
+	s.homepage = "https://github.com/grimheart"
 
   s.requirements << 's25-utility'
   s.require_path = 'lib'

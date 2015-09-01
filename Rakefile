@@ -1,5 +1,6 @@
 require 'rubygems/package_task'
 
+desc "Open an IRB session with the library already require'd"
 task :console do
   require 'irb'
   require 'irb/completion'
@@ -10,13 +11,15 @@ end
 
 spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
-  s.summary = "Simple commandline interface for handling options"
   s.name = 's25-cli'
-	s.authors = "Macquarie Sharpless"
   s.version = 0.1
+  s.summary = "Simple commandline interface for handling options"
+	s.authors = "Macquarie Sharpless"
+	s.email = "macquarie.sharpless@gmail.com"
+
   s.requirements << 's25-utility'
   s.require_path = 'lib'
-  s.files = []
+  s.files = ['lib/cli.rb']
   s.description = <<EOF
 A simple commandline interface for handling options. Parses ARGV and returns an
 object holding information about what options were set on the commandline, and

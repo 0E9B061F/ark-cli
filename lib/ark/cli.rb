@@ -1,7 +1,7 @@
-require_relative 'utility.rb'
-include S25::Log
+require 'ark/utility'
+include Ark::Log
 
-module S25
+module Ark
 
 class CLI
 

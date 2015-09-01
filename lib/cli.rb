@@ -1,8 +1,15 @@
 require_relative 'utility.rb'
+include S25::Log
 
 module S25
 
 class CLI
+
+	class NoSuchOptionError < ArgumentError
+	end
+
+	class SyntaxError < ArgumentError
+	end
 
 	class Option
 		def initialize(keys, args=nil, desc=nil)
@@ -128,7 +135,7 @@ class CLI
 							opt = self.get_opt(short)
 							last_opt = opt
 							if opt.has_args? && shorts.length > 1 && !last_short
-								raise StandardError, "Error: compound option '#{word}' expected an argument"
+								raise SyntaxError, "Error: compound option '#{word}' expected an argument"
 							elsif opt.flag?
 								opt.toggle()
 								dbg "Toggled flag '#{opt}'", 1
@@ -169,8 +176,7 @@ class CLI
 	def get_opt(key)
 		key = key.to_sym
 		if !@options.keys.member?(key)
-			puts "Error, no such option: '#{key}'"
-			raise ArgumentError
+			raise NoSuchOptionError, "Error, no such option: '#{key}'"
 		end
 		return @options[key]
 	end

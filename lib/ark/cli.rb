@@ -237,6 +237,8 @@ class CLI
       else
         @scriptargs = []
       end
+    else
+      @refargs = @scriptargs.clone
     end
   end
 

@@ -217,7 +217,7 @@ class CLI
           options = " [OPTION...]"
         end
         if @scriptargs
-          args = ' ' + @scriptargs
+          args = ' ' + @scriptargs.join(' ').upcase
         end
         puts "#{@scriptname}#{options}#{args}"
       end

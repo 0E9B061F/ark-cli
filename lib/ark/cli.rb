@@ -5,9 +5,11 @@ module Ark
 
 class CLI
 
+  # Raised when a nonexistant option is received
   class NoSuchOptionError < ArgumentError
   end
 
+  # Raised when the command line is malformed
   class SyntaxError < ArgumentError
   end
 
@@ -111,6 +113,8 @@ class CLI
   def initialize(args)
     @args = args
     @output_args = []
+    @scriptargs = []
+    @named_args = {}
     @options = {}
 
     self.opt :help, :h, desc: "Print usage information"
@@ -155,6 +159,8 @@ class CLI
           dbg "Parsed output arg", 1
           taking_options = false
           @output_args << word
+          key = @scriptargs.shift
+          @named_args[key] = word if key
         end
       end
     end
@@ -171,6 +177,10 @@ class CLI
 
   def args()
     return @output_args
+  end
+
+  def arg(key)
+    return @named_args[key]
   end
 
   def get_opt(key)
@@ -193,7 +203,7 @@ class CLI
   def header(**fields)
     @scriptname = fields[:name]
     @desc = fields[:desc]
-    @scriptargs = fields[:args]
+    @scriptargs = fields[:args].map(&:to_sym)
   end
 
   def print_help()

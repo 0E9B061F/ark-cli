@@ -38,7 +38,7 @@ desc "Open an IRB session with the library already require'd"
 task :console do
   require 'irb'
   require 'irb/completion'
-  require_relative 'lib/cli.rb'
+  require_relative 'lib/ark/cli.rb'
   ARGV.clear
   IRB.start
 end

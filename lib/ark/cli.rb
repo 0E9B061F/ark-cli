@@ -114,10 +114,13 @@ class CLI
     @args = args
     @output_args = []
     @scriptargs = []
+    @refargs = []
     @named_args = {}
     @options = {}
     @variadic = false
     @variad = nil
+    @scriptname = nil
+    @desc = nil
 
     self.opt :help, :h, desc: "Print usage information"
   end
@@ -229,6 +232,7 @@ class CLI
       if @scriptargs.length > 1
         @variadic = true
         @scriptargs.pop
+        @refargs = @scriptargs.clone
         @variad = @scriptargs.last
       else
         @scriptargs = []
@@ -242,22 +246,23 @@ class CLI
       if @scriptname
         options = ''
         args =''
+        variads = ''
         if @options.length == 1
           options = " [OPTION]"
         elsif @options.length > 1
           options = " [OPTION...]"
         end
-        if @scriptargs
+        if !@refargs.empty?
           if @variadic
-            singles = @scriptargs[0..-2].join(' ').upcase
+            singles = @refargs[0..-2].join(' ').upcase
+            args = " #{singles}" unless singles.empty?
             v = @variad.upcase
-            variads = "#{v}1 #{v}2..."
-            args = " #{singles} #{variads}"
+            variads = " #{v}1 #{v}2..."
           else
-            args = ' ' + @scriptargs.join(' ').upcase
+            args = ' ' + @refargs.join(' ').upcase
           end
         end
-        puts "#{@scriptname}#{options}#{args}"
+        puts "#{@scriptname}#{options}#{args}#{variads}"
       end
       if @desc
         puts '    ' + @desc

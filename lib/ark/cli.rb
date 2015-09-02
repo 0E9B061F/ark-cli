@@ -9,7 +9,7 @@ module Ark # :nodoc:
 # +README.md+ or +example/hello.rb+ for more information.
 class CLI
 
-  # Raised when a nonexistant option is received
+  # Raised when a nonexistent option is received
   class NoSuchOptionError < ArgumentError
   end
 

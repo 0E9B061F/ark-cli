@@ -3,9 +3,9 @@ require 'rubygems/package_task'
 v = `git describe --tags`.strip.tr('-', '.')
 c = 2 - v.count('.')
 if c > 0
-	v = v + ('.0' * c)
+  v = v + ('.0' * c)
 else
-	v.sub!(/\.[^\.]+$/, '.pre')
+  v.sub!(/\.[^\.]+$/, '.pre')
 end
 Version = v
 
@@ -13,11 +13,11 @@ spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.name     = 'ark-cli'
   s.version  = Version
-	s.license  = 'GPL-3.0'
+  s.license  = 'GPL-3.0'
   s.summary  = "Simple commandline interface"
-	s.authors  = ["Macquarie Sharpless"]
-	s.email    = ["macquarie.sharpless@gmail.com"]
-	s.homepage = "https://github.com/grimheart/ark-cli"
+  s.authors  = ["Macquarie Sharpless"]
+  s.email    = ["macquarie.sharpless@gmail.com"]
+  s.homepage = "https://github.com/grimheart/ark-cli"
   s.description = <<EOF
 A simple library for parsing options and arguments from the commandline. Parses
 ARGV and returns an object holding information about what options were set on
@@ -26,12 +26,12 @@ EOF
 
   s.require_paths = ['lib']
   s.files = ['lib/ark/cli.rb']
-	s.add_dependency 'ark-util', '~> 0.1', '>= 0.1.0'
+  s.add_dependency 'ark-util', '~> 0.1', '>= 0.1.0'
 end
 
 desc "Print the version for the current revision"
 task :version do
-	puts Version
+  puts Version
 end
 
 desc "Open an IRB session with the library already require'd"
@@ -45,9 +45,9 @@ end
 
 desc "Run all test cases"
 task :test do
-	Dir['test/*'].select {|p| File.basename(p)[/^tc_.+\.rb$/] }.each do |path|
-		system "ruby #{path}"
-	end
+  Dir['test/*'].select {|p| File.basename(p)[/^tc_.+\.rb$/] }.each do |path|
+    system "ruby #{path}"
+  end
 end
 
 Gem::PackageTask.new(spec) do |pkg|

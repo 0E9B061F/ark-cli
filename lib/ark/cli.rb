@@ -116,10 +116,13 @@ class CLI
     @scriptargs = []
     @named_args = {}
     @options = {}
+    @variadic = false
+    @variad = nil
 
     self.opt :help, :h, desc: "Print usage information"
   end
 
+  # Parse the commandline
   def parse()
     taking_options = true
     last_opt = nil
@@ -160,13 +163,23 @@ class CLI
           taking_options = false
           @output_args << word
           key = @scriptargs.shift
-          @named_args[key] = word if key
+          if key
+            if key == @variad
+              @named_args[key] = []
+              @named_args[key] << word
+            else
+              @named_args[key] = word
+            end
+          elsif @variadic
+            @named_args[@variad] << word
+          end
         end
       end
     end
 
   end
 
+  # Define an option
   def opt(*keys, **parameters)
     keys.map! {|k| k.to_sym }
     args = parameters[:args]
@@ -175,14 +188,17 @@ class CLI
     keys.each {|k| @options[k] = o }
   end
 
+  # Return all arguments
   def args()
     return @output_args
   end
 
+  # Return the value of a named argument
   def arg(key)
-    return @named_args[key]
+    return @named_args[key.to_sym]
   end
 
+  # Get an option object for the given option name
   def get_opt(key)
     key = key.to_sym
     if !@options.keys.member?(key)
@@ -191,6 +207,7 @@ class CLI
     return @options[key]
   end
 
+  # Get the value of a given option
   def [](key)
     return self.get_opt(key).value
   end
@@ -200,12 +217,26 @@ class CLI
     return self.get_opt(key).count
   end
 
+  # Specify header information about the program
+  # name: name of the program
+  # desc: short description of the program
+  # args: named arguments
   def header(**fields)
     @scriptname = fields[:name]
     @desc = fields[:desc]
     @scriptargs = fields[:args].map(&:to_sym)
+    if @scriptargs.last == :*
+      if @scriptargs.length > 1
+        @variadic = true
+        @scriptargs.pop
+        @variad = @scriptargs.last
+      else
+        @scriptargs = []
+      end
+    end
   end
 
+  # Print usage information
   def print_help()
     if @scriptname || @desc
       if @scriptname
@@ -217,7 +248,14 @@ class CLI
           options = " [OPTION...]"
         end
         if @scriptargs
-          args = ' ' + @scriptargs.join(' ').upcase
+          if @variadic
+            singles = @scriptargs[0..-2].join(' ').upcase
+            v = @variad.upcase
+            variads = "#{v}1 #{v}2..."
+            args = " #{singles} #{variads}"
+          else
+            args = ' ' + @scriptargs.join(' ').upcase
+          end
         end
         puts "#{@scriptname}#{options}#{args}"
       end

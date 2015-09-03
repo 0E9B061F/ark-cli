@@ -54,6 +54,8 @@ class CLI
     # Useful for flags that might be specified repeatedly, like +-vvv+ to raise
     # verbosity three times.
     attr_reader :count
+    # A short description of the option, if given
+    attr_reader :desc
 
     # Return the number of arguments this option expects
     def arity()
@@ -133,12 +135,6 @@ class CLI
     # Represent this option as a string
     def to_s()
       return "(#{self.header})"
-    end
-
-    # Return usage information about this option; names, arguments and a
-    # description, if present
-    def usage()
-      self.header + "\n" + '        ' + @desc
     end
   end
 
@@ -299,41 +295,47 @@ class CLI
 
   # Print usage information
   def print_help()
-    if @scriptname || @desc
-      if @scriptname
-        options = ''
-        args =''
-        variads = ''
-        if @options.length == 1
-          options = " [OPTION]"
-        elsif @options.length > 1
-          options = " [OPTION...]"
-        end
-        if !@refargs.empty?
-          if @variadic
-            singles = @refargs[0..-2].join(' ').upcase
-            args = " #{singles}" unless singles.empty?
-            v = @variad.upcase
-            variads = " #{v}1 #{v}2..."
-          else
-            args = ' ' + @refargs.join(' ').upcase
-          end
-        end
-        puts "#{@scriptname}#{options}#{args}#{variads}"
-      end
-      if @desc
-        puts '    ' + @desc
-      end
-      if @options.length > 0
-        puts
-        puts 'OPTIONS:'
-        puts
+    tb = TextBuilder.new()
+
+    tb.push @scriptname || 'Usage:'
+
+    if @options.length > 0
+      tb.push '[OPTION'
+      tb.add  '...' if @options.values.uniq.length > 1
+      tb.add  ']'
+    end
+
+    if !@refargs.empty?
+      if @variadic
+        singles = @refargs[0..-2].map(&:upcase)
+        tb.push singles
+        v = @variad.upcase
+        tb.push "#{v}1 #{v}2..."
+      else
+        tb.push @refargs.map(&:upcase)
       end
     end
+
+    if @desc
+      tb.next @desc
+      tb.wrap(indent: 4)
+    end
+
+    tb.skip 'OPTIONS:'
+    tb.skip
+
     @options.values.uniq.each do |opt|
-      puts '    ' + opt.usage
-      puts
+      tb.indent 4
+      tb.push opt.header
+      if opt.desc
+        tb.next
+        tb.indent 8
+        tb.push opt.desc
+      end
+      tb.skip
     end
+
+    puts tb.print
   end
 
 end

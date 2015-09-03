@@ -42,11 +42,11 @@ if verbosity == 0
   greeting = "Hello, #{name}!"
   inquiry = "How's #{friend}?"
 elsif verbosity == 1
-  greeting = "Greetings and salutations, #{name} - and what a fine day!"
+  greeting = "Greetings and salutations, #{name} -- and what a fine day!"
   inquiry = "Say, how's #{friend} doing?"
 elsif verbosity > 1
-  greeting = "Greetings and salutations, #{name}, my friend, blood beating in my heart - you've been well, I trust? Of course you have, look at you! The splitting image of health. No, don't say a word - modesty is your only fault, if I might say so."
-  inquiry = "And how is #{friend}? Quite well, I hope, I truly do - truly a fine person of outstanding character, that #{friend}! And no doubt - make no mistake! - a perfectly suitable friend for one such as yourself."
+  greeting = "Greetings and salutations, #{name}, my friend, blood shaking in my heart -- you've been well, I trust? Of course you have, look at you! The splitting image of health. No, don't say a word -- modesty is your only fault, if I might say so."
+  inquiry = "And how is #{friend}? Quite well, I hope, I truly do -- truly a fine person of outstanding character, that #{friend}! And no doubt -- make no mistake! -- a perfectly suitable friend for one such as yourself."
 end
 
 if friend

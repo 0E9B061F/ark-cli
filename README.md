@@ -1,5 +1,7 @@
 # ark-cli
 
+[![Gem Version](https://badge.fury.io/rb/ark-cli.svg)](http://badge.fury.io/rb/ark-cli)
+
 __ark-cli__ is a simple library for handling command line options and
 arguments. See below for basic usage. Full documentation can be found at
 http://www.rubydoc.info/github/grimheart/ark-cli

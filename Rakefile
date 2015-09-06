@@ -6,7 +6,7 @@ c = 2 - v.count('.')
 if c > 0
   v = v + ('.0' * c)
 else
-  v.sub!(/\.[^\.]+$/, '.pre')
+  v.sub!(/\.[^\.]+$/, '')
 end
 Version = v
 
@@ -27,7 +27,7 @@ EOF
 
   s.require_paths = ['lib']
   s.files = ['lib/ark/cli.rb']
-  s.add_dependency 'ark-util', '~> 0.2', '>= 0.2.0.pre'
+  s.add_dependency 'ark-util', '~> 0.2', '>= 0.2.0'
 end
 
 desc "Print the version for the current revision"

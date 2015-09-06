@@ -493,9 +493,6 @@ class Spec
 
 end
 
-class Definition
-end
-
 class Report
   def initialize()
     @args = []

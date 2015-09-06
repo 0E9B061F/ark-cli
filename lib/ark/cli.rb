@@ -25,117 +25,118 @@ module Ark # :nodoc:
 #
 # Call #begin to define a new interface and parse the command line. See
 # +README.md+ or +example/hello.rb+ for more information.
-class CLI
 
-  # Raised when a nonexistent option is received
-  class NoSuchOptionError < ArgumentError
+# Represents an option and stores the option's current state, as well as
+# usage information.
+class Option
+  # Initialize a new Option instance
+  # [+keys+] A list of names this option will be identified by
+  # [+args+] A list of argument named this option will expect
+  # [+desc+] A short description of this option
+  def initialize(long, short=nil, args=nil, desc=nil)
+    @long  = long
+    @short = short
+    @args  = args || []
+    @vals  = []
+    @flag  = false
+    @count = 0
+    @desc  = desc || ''
   end
+  # A count of how many times this option has been given on the command line.
+  # Useful for flags that might be specified repeatedly, like +-vvv+ to raise
+  # verbosity three times.
+  attr_reader :count
+  # A short description of the option, if given
+  attr_reader :desc
+  # Long name for this option
+  attr_reader :long
+  # Short name for this option
+  attr_reader :short
+
+  # Return the number of arguments this option expects
+  def arity()
+    return @args.length
+  end
+
+  # Return a count of how many arguments this option still expects
+  def vals_needed()
+    if self.flag?
+      return 0
+    else
+      return @args.length - @vals.length
+    end
+  end
+
+  # True if this option has received all the arguments it expects, or if this
+  # option expects no arguments
+  def full?
+    return self.vals_needed == 0
+  end
+
+  # True if this option expects no arguments; opposite of #has_args?
+  def flag?
+    return @args.empty?
+  end
+
+  # Toggle this option to the true state and increment the toggle count. Only
+  # valid for options which expect no argument (flags). Attempting to toggle
+  # a option with expected arguments will raise an error.
+  def toggle()
+    if self.flag?
+      @count += 1
+      @flag = true
+    else
+      raise StandardError, "Tried to toggle an option which expects an argument"
+    end
+  end
+
+  # Pass an argument +arg+ to this option
+  def push(arg)
+    @vals << arg
+  end
+
+  # Return the current value of this option
+  def value()
+    if self.flag?
+      return @flag
+    else
+      if self.full? && @vals.length == 1
+        return @vals[0]
+      elsif self.full?
+        return @vals
+      else
+        return nil
+      end
+    end
+  end
+
+  # True if this option expects an argument. Opposite of #flag?
+  def has_args?
+    return @args.length > 0
+  end
+
+  # Return basic usage information: the option's names and arguments
+  def header()
+    if self.flag?
+      args = ''
+    else
+      args = ' ' + @args.join(', ').upcase
+    end
+    short = @short ? " -#{@short}" : ''
+    return "--#{@long}#{short}#{args}"
+  end
+
+  # Represent this option as a string
+  def to_s()
+    return "(#{self.header})"
+  end
+end
+
+
+class CLI
 
   # Raised when the command line is malformed
   class SyntaxError < ArgumentError
-  end
-
-  # Represents an option and stores the option's current state, as well as
-  # usage information.
-  class Option
-    # Initialize a new Option instance
-    # [+keys+] A list of names this option will be identified by
-    # [+args+] A list of argument named this option will expect
-    # [+desc+] A short description of this option
-    def initialize(keys, args=nil, desc=nil)
-      @keys  = keys
-      @args  = args || []
-      @vals  = []
-      @flag  = false
-      @count = 0
-      @desc  = desc || ''
-    end
-    # A count of how many times this option has been given on the command line.
-    # Useful for flags that might be specified repeatedly, like +-vvv+ to raise
-    # verbosity three times.
-    attr_reader :count
-    # A short description of the option, if given
-    attr_reader :desc
-
-    # Return the number of arguments this option expects
-    def arity()
-      return @args.length
-    end
-
-    # Return a count of how many arguments this option still expects
-    def vals_needed()
-      if self.flag?
-        return 0
-      else
-        return @args.length - @vals.length
-      end
-    end
-
-    # True if this option has received all the arguments it expects, or if this
-    # option expects no arguments
-    def full?
-      return self.vals_needed == 0
-    end
-
-    # True if this option expects no arguments; opposite of #has_args?
-    def flag?
-      return @args.empty?
-    end
-
-    # Toggle this option to the true state and increment the toggle count. Only
-    # valid for options which expect no argument (flags). Attempting to toggle
-    # a option with expected arguments will raise an error.
-    def toggle()
-      if self.flag?
-        @count += 1
-        @flag = true
-      else
-        raise StandardError, "Tried to toggle an option which expects an argument"
-      end
-    end
-
-    # Pass an argument +arg+ to this option
-    def push(arg)
-      @vals << arg
-    end
-
-    # Return the current value of this option
-    def value()
-      if self.flag?
-        return @flag
-      else
-        if self.full? && @vals.length == 1
-          return @vals[0]
-        elsif self.full?
-          return @vals
-        else
-          return nil
-        end
-      end
-    end
-
-    # True if this option expects an argument. Opposite of #flag?
-    def has_args?
-      return @args.length > 0
-    end
-
-    # Return basic usage information: the option's names and arguments
-    def header()
-      if self.flag?
-        args = ''
-      else
-        args = ' ' + @args.join(', ').upcase
-      end
-      keys = @keys.sort {|a,b| a.length <=> b.length }
-      keys = keys.map {|k| k.length > 1 ? "--#{k}" : "-#{k}" }
-      keys = keys.join(' ')
-      return keys + args
-    end
-
-    # Represent this option as a string
-    def to_s()
-      return "(#{self.header})"
-    end
   end
 
   # Convenience method for interface declarations. Yields the CLI instance and
@@ -143,42 +144,37 @@ class CLI
   # with #new, modifying it, and then calling #parse
   #
   # +args+ is an array of strings, which defaults to ARGV
-  def self.begin(args=ARGV, &block)
-    cli = self.new(args)
-    yield cli
-    cli.parse()
-    if cli[:help]
-      cli.print_help()
-      exit 0
-    else
-      return cli
-    end
+  def self.report(args=ARGV, &block)
+    cli = self.new(args, &block)
+    return cli.report
   end
 
   # Initialize a CLI instance.
   #
   # +args+ must be an array of strings, like ARGV
-  def initialize(args)
-    @args = args
-    @output_args = []
-    @scriptargs = []
-    @refargs = []
-    @named_args = {}
-    @options = {}
-    @variadic = false
-    @variad = nil
-    @scriptname = nil
-    @desc = nil
+  def initialize(args, &block)
+    self.rebuild(args, &block)
+  end
 
-    self.opt :help, :h, desc: "Print usage information"
+  attr_reader :report
+
+  def rebuild(input=ARGV, &block)
+    @input = input
+    @spec = Spec.new
+    yield @spec
+    @spec.opt :help, :h, desc: "Print usage information"
+    self.parse
   end
 
   # Parse the command line
   def parse()
     taking_options = true
     last_opt = nil
+    refargs = @spec.get_args.clone
 
-    @args.each do |word|
+    @report = Report.new()
+
+    @input.each do |word|
       dbg "Parsing '#{word}'"
       if last_opt && last_opt.has_args? && !last_opt.full?
         dbg "Got argument '#{word}' for '#{last_opt}'", 1
@@ -190,10 +186,10 @@ class CLI
             shorts = word[/[^-]+$/].split('')
             shorts.each_with_index do |short, i|
               last_short = i == (shorts.length - 1)
-              opt = self.get_opt(short)
+              opt = @spec.get_opt(short)
               last_opt = opt
               if opt.has_args? && shorts.length > 1 && !last_short
-                raise SyntaxError, "Error: compound option '#{word}' expected an argument"
+                raise SyntaxError, "Error: -#{short} in compound option '#{word}' expects an argument"
               elsif opt.flag?
                 opt.toggle()
                 dbg "Toggled flag '#{opt}'", 1
@@ -202,7 +198,7 @@ class CLI
           elsif word[/^--/]
             dbg "Identified long option", 1
             key = word[/[^-]+$/]
-            opt = self.get_opt(key)
+            opt = @spec.get_opt(key)
             last_opt = opt
             if opt.flag?
               opt.toggle()
@@ -212,44 +208,188 @@ class CLI
         else
           dbg "Parsed output arg", 1
           taking_options = false
-          @output_args << word
-          key = @scriptargs.shift
+          @report.args << word
+          key = refargs.shift
           if key
-            if key == @variad
-              @named_args[key] = []
-              @named_args[key] << word
+            if key == @spec.get_variad
+              @report.arg[key] = []
+              @report.arg[key] << word
             else
-              @named_args[key] = word
+              @report.arg[key] = word
             end
-          elsif @variadic
-            @named_args[@variad] << word
+          elsif @spec.is_variadic?
+            @report.arg[@spec.get_variad] << word
+          else
+            @report.trailing << word
           end
         end
       end
     end
-
+    @spec.get_opts.each do |name, opt|
+      @report.opt[name] = opt.value
+      @report.count[name] = opt.count
+    end
+    @spec.get_args.each do |name|
+      if @report.arg[name].nil?
+        if @spec.has_default?(name)
+          @report.arg[name] = @spec.get_default(name)
+          @report.args << @report.arg[name]
+        end
+      end
+    end
+    if @report.opt[:help]
+      self.print_usage()
+    end
   end
 
-  # Define an Option
-  # [+keys+] A list of names for this option
-  # [+args+] A list of arguments the option expects
-  # [+desc+] A short description of the option, used to provide usage info
-  def opt(*keys, args: nil, desc: nil)
-    raise ArgumentError, "An option must have at least one name" if keys.empty?
-    keys.map!(&:to_sym)
-    args.map!(&:to_sym) if args
-    o = Option.new(keys, args, desc)
-    keys.each {|k| @options[k] = o }
+  # Construct usage information
+  def usage()
+    tb = TextBuilder.new()
+
+    tb.next 'USAGE:'
+    tb.push @spec.get_name if @spec.get_name
+
+    tb.push '[OPTION'
+    tb.add  '...' if @spec.has_options?
+    tb.add  ']'
+
+    if @spec.has_args?
+      if @spec.is_variadic?
+        singles = @spec.get_args[0..-2].map do |a|
+          if @spec.has_default?(a)
+            a = "[#{a}]"
+          end
+          a.upcase
+        end
+        tb.push singles
+        v = @spec.get_args.last.upcase
+        tb.push "[#{v}1 #{v}2...]"
+      else
+        argmap = @spec.get_args.map do |a|
+          if @spec.has_default?(a)
+            a = "[#{a}]"
+          end
+          a.upcase
+        end
+        tb.push argmap
+      end
+    end
+
+    if @spec.get_desc
+      tb.skip @spec.get_desc
+      tb.wrap(indent: 4)
+    end
+
+    tb.skip 'OPTIONS:'
+    tb.skip
+
+    @spec.get_opts.values.uniq.each do |opt|
+      tb.indent 4
+      tb.push opt.header
+      if opt.desc
+        tb.next
+        tb.indent 8
+        tb.push opt.desc
+      end
+      tb.skip
+    end
+
+    return tb.print
   end
 
-  # Return all command line arguments
-  def args()
-    return @output_args
+  # Print usage information and exit
+  def print_usage()
+    puts self.usage
+    exit 0
+  end
+end
+
+class Spec
+
+  # Raised when a nonexistent option is received
+  class NoSuchOptionError < ArgumentError
   end
 
-  # Return the value of the named argument +name+
-  def arg(name)
-    return @named_args[name.to_sym]
+  # Raised when there is a syntax error in the args declaration
+  class ArgumentSyntaxError < ArgumentError
+  end
+
+  # Initialize a bare interface spec
+  def initialize()
+    @args = []
+    @options = {}
+    @variadic       = false
+    @option_listing = false
+    @trailing_error = false
+  end
+  # If true, the full option list will always be displayed in the usage info
+  # header
+  attr_reader :option_listing
+  # If true, an error will be raised if trailing arguments are given
+  attr_reader :trailing_error
+
+  private
+
+  def strip(arg)
+    return arg[/^(.+?)(\.\.\.$|_$|$)/, 1]
+  end
+
+  def optional?(arg)
+    return !arg[/_$/].nil?
+  end
+
+  def variadic?(arg)
+    return !arg[/\.\.\.$/].nil?
+  end
+
+  def parse_arg(arg, default: nil, last: false)
+    stripped = strip(arg)
+    @args << stripped
+    if optional?(arg)
+      @optional << stripped
+    end
+    unless default.nil?
+      @defaults[stripped] = default
+    end
+    if variadic?(arg)
+      if last
+        @variadic = true
+        @variad = stripped
+      else
+        raise ArgumentSyntaxError,
+        "Variadic arguments must come last. Offending variad is '#{arg}'"
+      end
+    end
+  end
+
+  public
+
+  def get_name
+    return @name
+  end
+
+  def get_desc
+    return @desc
+  end
+
+  def get_args
+    return @args
+  end
+
+  def get_opts
+    return @options
+  end
+
+  def is_variadic?
+    return @variadic
+  end
+
+  def get_variad
+    return @variad
+  end
+
+  def get_defaults
+    return @defaults
   end
 
   # Get an Option object for the given option +name+
@@ -261,14 +401,24 @@ class CLI
     return @options[name]
   end
 
-  # Get the value of a given option by +name+
-  def [](name)
-    return self.get_opt(name).value
+  def is_optional?(arg)
+    @optional.member?(arg.to_s)
   end
 
-  # Get the toggle count of a flag by +name+
-  def count(name)
-    return self.get_opt(name).count
+  def has_default?(arg)
+    @defaults.key?(arg.to_s)
+  end
+
+  def get_default(arg)
+    @defaults[arg.to_s]
+  end
+
+  def has_args?
+    @args.length > 0
+  end
+
+  def has_options?
+    @options.values.uniq.length > 1
   end
 
   # Specify general information about the program
@@ -276,69 +426,102 @@ class CLI
   # [+desc+] Short description of the program
   # [+args+] A list of named arguments
   def header(name: nil, desc: nil, args: [])
-    @scriptname = name
-    @desc = desc
-    @scriptargs = args.map(&:to_sym)
-    if @scriptargs.last == :*
-      if @scriptargs.length > 1
-        @variadic = true
-        @scriptargs.pop
-        @refargs = @scriptargs.clone
-        @variad = @scriptargs.last
-      else
-        @scriptargs = []
-      end
-    else
-      @refargs = @scriptargs.clone
-    end
+    self.name(name)
+    self.desc(desc)
+    self.args(args)
   end
 
-  # Print usage information
-  def print_help()
-    tb = TextBuilder.new()
+  # Set the name of the program to +str+
+  def name(str)
+    @name = str.to_s if str
+  end
 
-    tb.push @scriptname || 'Usage:'
+  # Set the description of the program to +str+
+  def desc(str)
+    @desc = str.to_s if str
+  end
 
-    if @options.length > 0
-      tb.push '[OPTION'
-      tb.add  '...' if @options.values.uniq.length > 1
-      tb.add  ']'
-    end
+  # Define what arguments the program will accept
+  def args(*input)
+    @args = []
+    @optional = []
+    @defaults = {}
 
-    if !@refargs.empty?
-      if @variadic
-        singles = @refargs[0..-2].map(&:upcase)
-        tb.push singles
-        v = @variad.upcase
-        tb.push "#{v}1 #{v}2..."
+    input.flatten.each_with_index do |item, i|
+      list_last = (input.length - (i + 1)) == 0
+      if item.is_a?(Hash)
+        item.each_with_index do |pair,ii|
+          k = pair[0].to_s
+          v = pair[1]
+          hash_last = (item.length - (ii + 1)) == 0
+          last = hash_last && list_last
+          parse_arg(k, default: v, last: last)
+        end
       else
-        tb.push @refargs.map(&:upcase)
+        parse_arg(item, last: list_last)
       end
     end
 
-    if @desc
-      tb.next @desc
-      tb.wrap(indent: 4)
-    end
+    @refargs = @args.clone
+  end
 
-    tb.skip 'OPTIONS:'
-    tb.skip
+  # Define an Option
+  # [+keys+] A list of names for this option
+  # [+args+] A list of arguments the option expects
+  # [+desc+] A short description of the option, used to provide usage info
+  def opt(long, short=nil, args: nil, desc: nil)
+    long = long.to_sym
+    short = short.to_sym if short
+    args = [args] if args.is_a?(String)
+    args.map!(&:to_sym) if args
+    o = Option.new(long, short, args, desc)
+    @options[long] = o
+    @options[short] = o if short
+  end
 
-    @options.values.uniq.each do |opt|
-      tb.indent 4
-      tb.push opt.header
-      if opt.desc
-        tb.next
-        tb.indent 8
-        tb.push opt.desc
-      end
-      tb.skip
-    end
+  # Force the full option list display in the usage info, no matter how many
+  # options the program has
+  def force_option_list()
+    @option_list = true
+  end
 
-    puts tb.print
+  # The parser will raise an error on finding trailing arguments (default
+  # behavior is to ignore and stuff the trailing args into Report.trailing_args)
+  def raise_on_trailing()
+    @trailing_error = true
   end
 
 end
 
+class Definition
 end
+
+class Report
+  def initialize()
+    @args = []
+    @named_args = {}
+    @trailing_args = []
+    @counts = {}
+    @options = {}
+  end
+  
+  def args
+    return @args
+  end
+  def arg
+    return @named_args
+  end
+  def trailing
+    return @trailing_args
+  end
+  def opt
+    return @options
+  end
+  def count
+    return @counts
+  end
+
+end
+
+end # module Ark
 

@@ -122,8 +122,8 @@ class Option
     else
       args = ' ' + @args.join(', ').upcase
     end
-    short = @short ? " -#{@short}" : ''
-    return "--#{@long}#{short}#{args}"
+    short = @short ? "-#{@short} " : ''
+    return "#{short}--#{@long}#{args}"
   end
 
   # Represent this option as a string

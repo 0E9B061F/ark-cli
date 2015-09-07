@@ -107,9 +107,13 @@ class Interface
     tb.next 'USAGE:'
     tb.push @spec.get_name if @spec.get_name
 
-    tb.push '[OPTION'
-    tb.add  '...' if @spec.has_options?
-    tb.add  ']'
+    if @spec.get_opts.values.uniq.length < 5 || @spec.option_listing
+      @spec.get_opts.values.uniq.each do |opt|
+        tb.push "[#{opt.header}]"
+      end
+    else
+      tb.push '[OPTION...]'
+    end
 
     if @spec.has_args?
       if @spec.is_variadic?
@@ -132,6 +136,8 @@ class Interface
         tb.push argmap
       end
     end
+
+    tb.wrap indent: 7, indent_after: true, segments: true
 
     if @spec.get_desc
       tb.skip @spec.get_desc

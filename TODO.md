@@ -14,8 +14,11 @@
 * Create an Argument class to represent individual args, which has become more
   cumbersome with globs and default values.
 
-* Make it so an error is raised when not all required arguments are given
+* Make sure an error is raised when not all required arguments are given
+
+* Make sure an error is raised when `Spec#raise_on_trailing` is specified and
+  trailing arguments are given
 
 * Change the Report class to raise an error when nonexistant argument or option
-  names are used
+  names are given
 

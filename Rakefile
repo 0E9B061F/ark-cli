@@ -27,7 +27,7 @@ EOF
 
   s.require_paths = ['lib']
   s.files = ['README.md', 'lib/ark/cli.rb'] + Dir['lib/ark/cli/*']
-  s.add_dependency 'ark-util', '~> 0.2', '>= 0.2.0'
+  s.add_dependency 'ark-util', '~> 0.3', '>= 0.3.0'
 end
 
 desc "Print the version for the current revision"

@@ -1,12 +1,17 @@
-module Ark
+module Ark # :nodoc:
 module CLI
 
+# Main class for ark-cli. Defines a +Spec+, parses the command line and returns
+# +Report+ objects.
 class Interface
 
   # Raised when the command line is malformed
   class SyntaxError < ArgumentError
   end
 
+  # :call-seq:
+  # rebuild(input=ARGV) { |spec| ... } => Interface
+  #
   # Initialize an Interface instance.
   #
   # +args+ must be an array of strings, like ARGV
@@ -14,8 +19,11 @@ class Interface
     self.rebuild(args, &block)
   end
 
+  # The +Report+ object for this interface, for inspecting information parsed
+  # from the command line.
   attr_reader :report
 
+  # Rebuild the interface with a new spec and args
   def rebuild(input=ARGV, &block)
     @input = input
     @spec = Spec.new
@@ -166,7 +174,8 @@ class Interface
     puts self.usage
     exit 0
   end
-end
+
+end # class Interface
 
 end # module CLI
 end # module Ark

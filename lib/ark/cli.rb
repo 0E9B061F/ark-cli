@@ -28,12 +28,14 @@ module Ark # :nodoc:
 
 # A library for handling options and arguments from the command line.
 #
-# Call #begin to define a new interface and parse the command line. See
+# Call #report to define a new interface and parse the command line. See
 # +README.md+ or +example/hello.rb+ for more information.
 module CLI
-  # Convenience method for interface declarations. Yields the CLI instance and
-  # then returns it after parsing. Equivalent to instantiating a CLI instance
-  # with #new, modifying it, and then calling #parse
+  # :call-seq:
+  # report(input=ARGV) { |spec| ... } => Report
+  #
+  # Convenience method for interface declarations. Yields a +Spec+ instance and
+  # returns a +Report+ instance for inspection.
   #
   # +args+ is an array of strings, which defaults to ARGV
   def self.report(args=ARGV, &block)

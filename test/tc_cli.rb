@@ -31,7 +31,7 @@ class TestArkCLI < Test::Unit::TestCase
 		assert_equal('e', r.trailing[2])
 
 		# argument defaults
-		r = Ark::CLI.report ['a', 'b'] {|s| s.args 'foo', {'bar' => '100', :baz => '200'}}
+		r = Ark::CLI.report ['a', 'b'] {|s| s.args 'foo', 'bar:100', 'baz:200'}
 		assert_equal(3, r.args.length)
 		assert_equal(3, r.arg.length)
 		assert_equal(0, r.trailing.length)
@@ -51,7 +51,7 @@ class TestArkCLI < Test::Unit::TestCase
 		assert_equal('e', r.arg['bar'][3])
 
 		# defaults mixed with variadic args
-		r = Ark::CLI.report ['a', 'b', 'c', 'd', 'e'] {|s| s.args 'foo', {'bar' => '42'}, 'baz...'}
+		r = Ark::CLI.report ['a', 'b', 'c', 'd', 'e'] {|s| s.args 'foo', 'bar:42', 'baz...'}
 		assert_equal(5, r.args.length)
 		assert_equal(3, r.arg.length)
 		assert_equal(0, r.trailing.length)

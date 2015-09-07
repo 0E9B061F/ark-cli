@@ -67,10 +67,13 @@ Declaring two named, expected arguments:
 s.args 'host', 'port'
 ```
 
-Declare optional arguments as a hash with default values:
+Declare defaults with a colon after the argument name, like `'host:localhost'`.
+Arguments with default values are optional - no error will be raised if they
+aren't given.
 
 ```ruby
-s.args 'host', {'port' => 22, 'user' => ENV['USER']}
+s.args 'file:~/.dcf'
+s.args 'host', 'port:22', "user:#{ENV['USER']}"
 ```
 
 Declaring a variadic interface with a glob, `'dest...'`

@@ -19,20 +19,26 @@ class Spec
     @option_listing = false
     @trailing_error = false
   end
+
   # If true, the full option list will always be displayed in the usage info
   # header
   attr_reader :option_listing
+
   # If true, an error will be raised if trailing arguments are given
   attr_reader :trailing_error
 
   private
 
   def strip(arg)
-    return arg[/^(.+?)(\.\.\.$|_$|$)/, 1]
+    return arg[/^(\S+?)(:|\.\.\.|$)/, 1]
   end
 
-  def optional?(arg)
-    return !arg[/_$/].nil?
+  def defaulted?(arg)
+    return !arg[/^\S+?:.+/].nil?
+  end
+
+  def parse_default(arg)
+    return arg[/^.+?:(.+)/, 1]
   end
 
   def variadic?(arg)
@@ -42,11 +48,8 @@ class Spec
   def parse_arg(arg, default: nil, last: false)
     stripped = strip(arg)
     @args << stripped
-    if optional?(arg)
-      @optional << stripped
-    end
-    unless default.nil?
-      @defaults[stripped] = default
+    if defaulted?(arg)
+      @defaults[stripped] = parse_default(arg)
     end
     if variadic?(arg)
       if last
@@ -73,20 +76,12 @@ class Spec
     return @args
   end
 
+  def has_options?
+    @options.values.uniq.length > 1
+  end
+
   def get_opts
     return @options
-  end
-
-  def is_variadic?
-    return @variadic
-  end
-
-  def get_variad
-    return @variad
-  end
-
-  def get_defaults
-    return @defaults
   end
 
   # Get an Option object for the given option +name+
@@ -98,12 +93,20 @@ class Spec
     return @options[name]
   end
 
-  def is_optional?(arg)
-    @optional.member?(arg.to_s)
+  def is_variadic?
+    return @variadic
+  end
+
+  def get_variad
+    return @variad
   end
 
   def has_default?(arg)
     @defaults.key?(arg.to_s)
+  end
+
+  def get_defaults
+    return @defaults
   end
 
   def get_default(arg)
@@ -112,10 +115,6 @@ class Spec
 
   def has_args?
     @args.length > 0
-  end
-
-  def has_options?
-    @options.values.uniq.length > 1
   end
 
   # Specify general information about the program
@@ -141,22 +140,11 @@ class Spec
   # Define what arguments the program will accept
   def args(*input)
     @args = []
-    @optional = []
     @defaults = {}
 
     input.flatten.each_with_index do |item, i|
-      list_last = (input.length - (i + 1)) == 0
-      if item.is_a?(Hash)
-        item.each_with_index do |pair,ii|
-          k = pair[0].to_s
-          v = pair[1]
-          hash_last = (item.length - (ii + 1)) == 0
-          last = hash_last && list_last
-          parse_arg(k, default: v, last: last)
-        end
-      else
-        parse_arg(item, last: list_last)
-      end
+      last = (input.length - (i + 1)) == 0
+      parse_arg(item, last: last)
     end
 
     @refargs = @args.clone

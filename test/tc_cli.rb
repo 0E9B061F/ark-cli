@@ -64,37 +64,37 @@ class TestArkCLI < Test::Unit::TestCase
 
 	def test_errors
 		# Single short option
-		assert_raise(Ark::Spec::NoSuchOptionError) do
+		assert_raise(Ark::CLI::Spec::NoSuchOptionError) do
 			Ark::CLI.report ['-v'] {|s| }
 		end
 
 		# Many short options in a compound
-		assert_raise(Ark::Spec::NoSuchOptionError) do
+		assert_raise(Ark::CLI::Spec::NoSuchOptionError) do
 			Ark::CLI.report ['-compound'] {|s| }
 		end
 
     # Long name form
-		assert_raise(Ark::Spec::NoSuchOptionError) do
+		assert_raise(Ark::CLI::Spec::NoSuchOptionError) do
 			Ark::CLI.report ['--longform'] {|s| }
 		end
 
     # Mixed forms
-		assert_raise(Ark::Spec::NoSuchOptionError) do
+		assert_raise(Ark::CLI::Spec::NoSuchOptionError) do
 			Ark::CLI.report ['-v', '--longform'] {|s| }
 		end
 
     # Mixed with args
-		assert_raise(Ark::Spec::NoSuchOptionError) do
+		assert_raise(Ark::CLI::Spec::NoSuchOptionError) do
 			Ark::CLI.report ['-v', '--longform', 'foo', 'bar'] {|s| }
 		end
 
     # Placing an option expecting an argument in the middle of a compound
-		assert_raise(Ark::CLI::SyntaxError) do
+		assert_raise(Ark::CLI::Interface::SyntaxError) do
 			Ark::CLI.report ['-fv'] {|s| s.opt :verbose, :v; s.opt :file, :f, args: 'name'}
 		end
 
     # Placing a variadic argument before the end of the argument list
-		assert_raise(Ark::Spec::ArgumentSyntaxError) do
+		assert_raise(Ark::CLI::Spec::ArgumentSyntaxError) do
 			Ark::CLI.report [] {|s| s.args 'foo', 'bar...', 'baz'}
 		end
 	end
@@ -203,7 +203,7 @@ class TestArkCLI < Test::Unit::TestCase
 		assert_true(r.opt[:flag])
 
 		# Trying to specify an option in the middle of a compound
-		assert_raise(Ark::CLI::SyntaxError) do
+		assert_raise(Ark::CLI::Interface::SyntaxError) do
 			r = Ark::CLI.report ['-af', 'test'] do |s|
 				s.opt :f, :flag
 				s.opt :a, :opta, args: ['one']

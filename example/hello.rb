@@ -12,29 +12,28 @@ r = Ark::CLI.report do |s|
   # Define the name of the program, its arguments and a description
   s.name 'hello.rb'
   s.args 'name'
-  s.desc 'ark-cli example script. Provide a NAME to recieve a greeting.'
+  s.desc 'ark-cli example script. Provide a NAME to receive a greeting.'
 
   # Define a flag with two names, which will be given as -v and --verbose on
   # the command line
   s.opt :verbose, :v,
-    desc: "Increase verbosity"
+  desc: "Increase verbosity"
 
   # Define an option which expects an argument
   s.opt :friend, :f,
-    args: 'name',
-    desc: "Inquire about a friend"
-
+  args: 'name',
+  desc: "Inquire about a friend"
 end
 
 
 # Get the number of times -v was toggled
-verbosity = r.count[:verbose]
+verbosity = r.count(:verbose)
 
 # Get the value of the 'name' argument
-name = r.arg['name'].capitalize
+name = r.arg(:name).capitalize
 
 # Get the value given for the --friend option
-friend = r.opt[:friend]
+friend = r.opt(:friend)
 
 
 # Craft an appropriate greeting

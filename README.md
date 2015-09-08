@@ -32,9 +32,9 @@ r = Ark::CLI.report do |s|
 end
 
 r.args       # Get all arguments received, including trailing args
-r.arg[:host] # Get the value of the `host` argument
-r.opt[:port] # Get the value of the `port` option
-r.count[:v]  # Get the number of times an option was toggled
+r.arg(:host) # Get the value of the `host` argument
+r.opt(:port) # Get the value of the `port` option
+r.count(:v)  # Get the number of times an option was toggled
 ```
 
 The `CLI.report` method yields a `Spec` instance, which we'll call `s`. Calls to
@@ -72,7 +72,7 @@ Arguments with default values are optional - no error will be raised if they
 aren't given.
 
 ```ruby
-s.args 'file:~/.dcf'
+s.args 'file:/tmp/foo'
 s.args 'host', 'port:22', "user:#{ENV['USER']}"
 ```
 
@@ -122,21 +122,21 @@ host, path = r.args
 Get the value of a named argument with the `r.arg` method:
 
 ```ruby
-host = r.arg[:host]
-path = r.arg[:path]
+host = r.arg(:host)
+path = r.arg(:path)
 ```
 
 Inspect the value of an option with `r.opt`:
 
 ```ruby
-verbose = r.opt[:v]
-port = r.opt[:port]
+verbose = r.opt(:v)
+port = r.opt(:port)
 ```
 
 Get a count of the number of times a flag was specified with `r.count`:
 
 ```ruby
-verbosity = r.count[:verbose]
+verbosity = r.count(:verbose)
 ```
 
 Get an array of trailing arguments with `r.trailing`:
@@ -156,7 +156,7 @@ CLI declaration.
 
 Usage information for the above declaration would look like this:
 
-    example [OPTION...] HOST PATH
+    example [-p --port NUMBER] [-v --verbose] [-h --help] HOST PATH
 
         An example demonstrating usage of ark-cli
 

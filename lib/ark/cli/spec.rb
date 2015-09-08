@@ -101,7 +101,7 @@ class Spec
 
   # Get an +Option+ object for the given option +name+
   def get_opt(name)
-    name = name.to_sym
+    name = name.to_s
     if !@options.keys.member?(name)
       raise NoSuchOptionError, "Error, no such option: '#{name}'"
     end
@@ -164,6 +164,7 @@ class Spec
     @defaults = {}
 
     input.flatten.each_with_index do |item, i|
+      item = item.to_s
       last = (input.length - (i + 1)) == 0
       parse_arg(item, last: last)
     end
@@ -176,10 +177,10 @@ class Spec
   # [+args+] A list of arguments the option expects
   # [+desc+] A short description of the option, used to provide usage info
   def opt(long, short=nil, args: nil, desc: nil)
-    long = long.to_sym
-    short = short.to_sym if short
+    long = long.to_s
+    short = short.to_s if short
     args = [args] if args.is_a?(String)
-    args.map!(&:to_sym) if args
+    args.map!(&:to_s) if args
     o = Option.new(long, short, args, desc)
     @options[long] = o
     @options[short] = o if short

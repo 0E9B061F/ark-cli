@@ -38,7 +38,11 @@ class Interface
     last_opt = nil
     refargs = @spec.get_args.clone
 
-    @report = Report.new()
+    args = []
+    trailing = []
+    named = {}
+    options = {}
+    counts = {}
 
     @input.each do |word|
       dbg "Parsing '#{word}'"
@@ -74,36 +78,40 @@ class Interface
         else
           dbg "Parsed output arg", 1
           taking_options = false
-          @report.args << word
+          args << word
           key = refargs.shift
           if key
             if key == @spec.get_variad
-              @report.arg[key] = []
-              @report.arg[key] << word
+              named[key] = []
+              named[key] << word
             else
-              @report.arg[key] = word
+              named[key] = word
             end
           elsif @spec.is_variadic?
-            @report.arg[@spec.get_variad] << word
+            named[@spec.get_variad] << word
           else
-            @report.trailing << word
+            trailing << word
           end
         end
       end
     end
     @spec.get_opts.each do |name, opt|
-      @report.opt[name] = opt.value
-      @report.count[name] = opt.count
+      options[name] = opt.value
+      counts[name]  = opt.count
     end
     @spec.get_args.each do |name|
-      if @report.arg[name].nil?
+      if named[name].nil?
         if @spec.has_default?(name)
-          @report.arg[name] = @spec.get_default(name)
-          @report.args << @report.arg[name]
+          named[name] = @spec.get_default(name)
+          args << named[name]
         end
       end
     end
-    if @report.opt[:help]
+    if @spec.is_variadic?
+      named[@spec.get_variad] ||= []
+    end
+    @report = Report.new(args, named, trailing, options, counts)
+    if @report.opt(:help)
       self.print_usage()
     end
   end

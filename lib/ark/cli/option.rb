@@ -9,14 +9,15 @@ class Option
   # [+keys+] A list of names this option will be identified by
   # [+args+] A list of argument named this option will expect
   # [+desc+] A short description of this option
-  def initialize(long, short=nil, args=nil, desc=nil)
-    @long  = long
-    @short = short
-    @args  = args || []
-    @vals  = []
-    @flag  = false
-    @count = 0
-    @desc  = desc || ''
+  def initialize(long, short=nil, args=nil, defaults=nil, desc=nil)
+    @long     = long
+    @short    = short
+    @args     = args || []
+    @defaults = defaults || {}
+    @vals     = []
+    @flag     = false
+    @count    = 0
+    @desc     = desc || ''
   end
 
   # A count of how many times this option has been given on the command line.
@@ -85,7 +86,11 @@ class Option
       elsif self.full?
         return @vals
       else
-        return nil
+        if !@defaults.compact.empty?
+          return @defaults.length > 1 ? @defaults : @defaults.first
+        else
+          return nil
+        end
       end
     end
   end

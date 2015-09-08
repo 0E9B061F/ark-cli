@@ -180,8 +180,20 @@ class Spec
     long = long.to_s
     short = short.to_s if short
     args = [args] if args.is_a?(String)
-    args.map!(&:to_s) if args
-    o = Option.new(long, short, args, desc)
+    defaults = []
+    if args
+      args.map! do |arg|
+        arg = arg.to_s
+        if defaulted?(arg)
+          defaults << parse_default(arg)
+          arg = strip(arg)
+        else
+          defaults << nil
+        end
+        arg
+      end
+    end
+    o = Option.new(long, short, args, defaults, desc)
     @options[long] = o
     @options[short] = o if short
   end

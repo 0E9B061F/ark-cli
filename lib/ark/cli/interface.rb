@@ -9,6 +9,10 @@ class Interface
   class SyntaxError < ArgumentError
   end
 
+  # Raised when a required argument is not given
+  class InterfaceError < ArgumentError
+  end
+
   # :call-seq:
   # rebuild(input=ARGV) { |spec| ... } => Interface
   #
@@ -104,6 +108,10 @@ class Interface
         if @spec.has_default?(name)
           named[name] = @spec.get_default(name)
           args << named[name]
+        else
+          unless @spec.is_variadic? && @spec.get_variad == name
+            raise InterfaceError, "Required argument '#{name.upcase}' was not given."
+          end
         end
       end
     end

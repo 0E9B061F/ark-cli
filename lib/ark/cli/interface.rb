@@ -99,6 +99,9 @@ class Interface
         end
       end
     end
+    if @spec.trailing_error && !trailing.empty?
+      raise InterfaceError, "Error: got trailing option(s): #{trailing.join(', ')}"
+    end
     @spec.get_opts.each do |name, opt|
       options[name] = opt.value
       counts[name]  = opt.count

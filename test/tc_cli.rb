@@ -169,7 +169,7 @@ class TestArkCLI < Test::Unit::TestCase
 			s.opt :b, :optb, args: ['one', 'two']
 		end
 		assert_equal('foo', r.opt(:a))
-		assert_nil(r.opt(:b))
+		assert_equal([nil, nil], r.opt(:b))
 
 		# Specifying one option with multiple arguments
 		r = Ark::CLI.report ['-b', 'foo', 'bar'] do |s|

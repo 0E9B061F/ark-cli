@@ -40,13 +40,13 @@ class Interface
   def parse()
     taking_options = true
     last_opt = nil
-    refargs = @spec.get_args.clone
 
     args = []
     trailing = []
     named = {}
     options = {}
     counts = {}
+    arg_index = 0
 
     @input.each do |word|
       dbg "Parsing '#{word}'"
@@ -82,46 +82,40 @@ class Interface
         else
           dbg "Parsed output arg", 1
           taking_options = false
-          args << word
-          key = refargs.shift
-          if key
-            if key == @spec.get_variad
-              named[key] = []
-              named[key] << word
-            else
-              named[key] = word
-            end
+          arg = @spec.get_args.values[arg_index]
+          arg_index += 1
+          if arg && !arg.variadic?
+            arg.set(word)
           elsif @spec.is_variadic?
-            named[@spec.get_variad] << word
+            @spec.get_variad.push(word)
           else
             trailing << word
           end
         end
       end
     end
+
     if @spec.trailing_error && !trailing.empty?
-      raise InterfaceError, "Error: got trailing option(s): #{trailing.join(', ')}"
+      raise InterfaceError, "Error: got trailing argument(s): #{trailing.join(', ')}"
     end
+
     @spec.get_opts.each do |name, opt|
       options[name] = opt.value
       counts[name]  = opt.count
     end
-    @spec.get_args.each do |name|
-      if named[name].nil?
-        if @spec.has_default?(name)
-          named[name] = @spec.get_default(name)
-          args << named[name]
-        else
-          unless @spec.is_variadic? && @spec.get_variad == name
-            raise InterfaceError, "Required argument '#{name.upcase}' was not given."
-          end
-        end
+
+    @spec.get_args.each do |name, arg|
+      unless arg.fulfilled?
+        raise InterfaceError, "Required argument '#{name.upcase}' was not given."
       end
+      args << arg.value
+      named[name] = arg.value
     end
-    if @spec.is_variadic?
-      named[@spec.get_variad] ||= []
-    end
+    args.flatten!
+    args += trailing
+
     @report = Report.new(args, named, trailing, options, counts)
+
     if @report.opt(:help)
       self.print_usage()
     end
@@ -144,21 +138,23 @@ class Interface
 
     if @spec.has_args?
       if @spec.is_variadic?
-        singles = @spec.get_args[0..-2].map do |a|
-          if @spec.has_default?(a)
-            a = "[#{a}]"
+        singles = @spec.get_args.values[0..-2].map do |a|
+          name = a.name
+          if a.has_default?
+            name = "[#{name}]"
           end
-          a.upcase
+          name.upcase
         end
         tb.push singles
-        v = @spec.get_args.last.upcase
+        v = @spec.get_variad.name.upcase
         tb.push "[#{v}1 #{v}2...]"
       else
-        argmap = @spec.get_args.map do |a|
-          if @spec.has_default?(a)
-            a = "[#{a}]"
+        argmap = @spec.get_args.values.map do |a|
+          name = a.name
+          if a.has_default?
+            name = "[#{name}]"
           end
-          a.upcase
+          name.upcase
         end
         tb.push argmap
       end

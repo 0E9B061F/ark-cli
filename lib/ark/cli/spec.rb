@@ -17,7 +17,7 @@ class Spec
 
   # Initialize a bare interface +Spec+
   def initialize()
-    @args = []
+    @arguments = {}
     @options = {}
     @variadic       = false
     @option_listing = false
@@ -31,49 +31,6 @@ class Spec
   # If true, an error will be raised if trailing arguments are given
   attr_reader :trailing_error
 
-  private
-
-  # Strip any special syntax from a given argument. Used when parsing arguments
-  def strip(arg)
-    return arg[/^(\S+?)(:|\.\.\.|$)/, 1]
-  end
-
-  # Return +true+ if the given argument has a default value, like +'arg:defaultvalue'+
-  def defaulted?(arg)
-    return !arg[/^\S+?:.+/].nil?
-  end
-
-  # Parse the default value from an arg with one
-  def parse_default(arg)
-    return arg[/^.+?:(.+)/, 1]
-  end
-
-  # Return +true+ if the given argument is a glob, like +'arg...'+
-  def variadic?(arg)
-    return !arg[/\.\.\.$/].nil?
-  end
-
-  # Parse a given argument, interpreting any special syntax, and storing
-  # argument information as needed
-  def parse_arg(arg, default: nil, last: false)
-    stripped = strip(arg)
-    @args << stripped
-    if defaulted?(arg)
-      @defaults[stripped] = parse_default(arg)
-    end
-    if variadic?(arg)
-      if last
-        @variadic = true
-        @variad = stripped
-      else
-        raise ArgumentSyntaxError,
-        "Variadic arguments must come last. Offending variad is '#{arg}'"
-      end
-    end
-  end
-
-  public
-
   # Get the name defined for this spec
   def get_name
     return @name
@@ -86,7 +43,7 @@ class Spec
 
   # Get an array of argument names defined for this spec
   def get_args
-    return @args
+    return @arguments
   end
 
   # Return +true+ if this interface has any options defined for it
@@ -108,6 +65,15 @@ class Spec
     return @options[name]
   end
 
+  # Get an +Argument+ object for the given argument +name+
+  def get_arg(name)
+    name = name.to_s
+    if !@arguments.keys.member?(name)
+      raise NoSuchArgumentError, "Error, no such argument: '#{name}'"
+    end
+    return @arguments[name]
+  end
+
   # Return +true+ if this interface is variadic
   def is_variadic?
     return @variadic
@@ -118,24 +84,9 @@ class Spec
     return @variad
   end
 
-  # Return +true+ if the given argument +arg+ has a default value
-  def has_default?(arg)
-    @defaults.key?(arg.to_s)
-  end
-
-  # Return a hash of all default values
-  def get_defaults
-    return @defaults
-  end
-
-  # Return the default value of the given argument +arg+
-  def get_default(arg)
-    @defaults[arg.to_s]
-  end
-
   # Return +true+ if this interface has any arguments defined
   def has_args?
-    @args.length > 0
+    @arguments.length > 0
   end
 
   # Specify general information about the program
@@ -160,16 +111,21 @@ class Spec
 
   # Define what arguments the program will accept
   def args(*input)
-    @args = []
-    @defaults = {}
-
+    @arguments = {}
     input.flatten.each_with_index do |item, i|
       item = item.to_s
       last = (input.length - (i + 1)) == 0
-      parse_arg(item, last: last)
+      arg  = Argument.parse(item)
+      if arg.variadic?
+        if !last
+          raise ArgumentSyntaxError, "Variadic arguments must come last. Offending variad is '#{arg}'"
+        else
+          @variadic = true
+          @variad = arg
+        end
+      end
+      @arguments[arg.name] = arg
     end
-
-    @refargs = @args.clone
   end
 
   # Define an Option
@@ -180,20 +136,8 @@ class Spec
     long = long.to_s
     short = short.to_s if short
     args = [args] if args.is_a?(String)
-    defaults = []
-    if args
-      args.map! do |arg|
-        arg = arg.to_s
-        if defaulted?(arg)
-          defaults << parse_default(arg)
-          arg = strip(arg)
-        else
-          defaults << nil
-        end
-        arg
-      end
-    end
-    o = Option.new(long, short, args, defaults, desc)
+    args.map! {|a| Argument.parse(a) } if args
+    o = Option.new(long, short, args, desc)
     @options[long] = o
     @options[short] = o if short
   end

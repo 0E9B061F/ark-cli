@@ -18,8 +18,9 @@
 require 'ark/utility'
 include Ark::Log
 
-require_relative 'cli/interface.rb'
+require_relative 'cli/argument.rb'
 require_relative 'cli/option.rb'
+require_relative 'cli/interface.rb'
 require_relative 'cli/spec.rb'
 require_relative 'cli/report.rb'
 

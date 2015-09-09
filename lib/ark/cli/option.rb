@@ -1,4 +1,4 @@
-module Ark
+module Ark # :nodoc:
 module CLI
 
 # Represents an option and stores the option's current state, as well as
@@ -9,15 +9,14 @@ class Option
   # [+keys+] A list of names this option will be identified by
   # [+args+] A list of argument named this option will expect
   # [+desc+] A short description of this option
-  def initialize(long, short=nil, args=nil, defaults=nil, desc=nil)
-    @long     = long
-    @short    = short
-    @args     = args || []
-    @defaults = defaults || {}
-    @vals     = []
-    @flag     = false
-    @count    = 0
-    @desc     = desc || ''
+  def initialize(long, short=nil, args=nil, desc=nil)
+    @long      = long
+    @short     = short
+    @args      = args || []
+    @flag      = false
+    @count     = 0
+    @desc      = desc || ''
+    @arg_index = 0
   end
 
   # A count of how many times this option has been given on the command line.
@@ -39,19 +38,14 @@ class Option
     return @args.length
   end
 
-  # Return a count of how many arguments this option still expects
-  def vals_needed()
-    if self.flag?
-      return 0
-    else
-      return @args.length - @vals.length
-    end
-  end
-
   # True if this option has received all the arguments it expects, or if this
   # option expects no arguments
   def full?
-    return self.vals_needed == 0
+    if self.flag?
+      return true
+    else
+      return (@args.length - @arg_index) < 1
+    end
   end
 
   # True if this option expects no arguments; opposite of #has_args?
@@ -71,9 +65,11 @@ class Option
     end
   end
 
-  # Pass an argument +arg+ to this option
-  def push(arg)
-    @vals << arg
+  # Pass an argument to this option
+  def push(val)
+    arg = @args[@arg_index]
+    @arg_index += 1
+    arg.set(val)
   end
 
   # Return the current value of this option
@@ -81,17 +77,9 @@ class Option
     if self.flag?
       return @flag
     else
-      if self.full? && @vals.length == 1
-        return @vals[0]
-      elsif self.full?
-        return @vals
-      else
-        if !@defaults.compact.empty?
-          return @defaults.length > 1 ? @defaults : @defaults.first
-        else
-          return nil
-        end
-      end
+      vals = @args.map {|a| a.value }
+      vals = vals.first if vals.length == 1
+      return vals
     end
   end
 
@@ -105,7 +93,7 @@ class Option
     if self.flag?
       args = ''
     else
-      args = ' ' + @args.join(', ').upcase
+      args = ' ' + @args.map {|a| a.name }.join(', ').upcase
     end
     short = @short ? "-#{@short} " : ''
     return "#{short}--#{@long}#{args}"

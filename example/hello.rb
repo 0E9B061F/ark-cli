@@ -34,6 +34,7 @@ name = r.arg(:name).capitalize
 
 # Get the value given for the --friend option
 friend = r.opt(:friend)
+friend = friend.capitalize if friend
 
 
 # Craft an appropriate greeting

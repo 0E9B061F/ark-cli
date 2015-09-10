@@ -95,19 +95,12 @@ class Interface
       end
     end
 
-    if @spec.trailing_error && !trailing.empty?
-      raise InterfaceError, "Error: got trailing argument(s): #{trailing.join(', ')}"
-    end
-
     @spec.get_opts.each do |name, opt|
       options[name] = opt.value
       counts[name]  = opt.count
     end
 
     @spec.get_args.each do |name, arg|
-      unless arg.fulfilled?
-        raise InterfaceError, "Required argument '#{name.upcase}' was not given."
-      end
       args << arg.value
       named[name] = arg.value
     end
@@ -118,6 +111,14 @@ class Interface
 
     if @report.opt(:help)
       self.print_usage()
+    end
+
+    unless @spec.get_args.values.all? {|arg| arg.fulfilled? }
+      raise InterfaceError, "Required argument '#{name.upcase}' was not given."
+    end
+
+    if @spec.trailing_error && !@report.trailing.empty?
+      raise InterfaceError, "Error: got trailing argument(s): #{trailing.join(', ')}"
     end
   end
 

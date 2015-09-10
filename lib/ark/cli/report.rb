@@ -27,6 +27,11 @@ class Report
     return @trailing
   end
 
+  # Get a hash of all options and their values
+  def opts
+    return @options
+  end
+
   # Get the value of an option by +name+
   def opt(name)
     return @options[name.to_s]

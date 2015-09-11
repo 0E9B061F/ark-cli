@@ -126,15 +126,15 @@ class Interface
   def usage()
     tb = TextBuilder.new()
 
-    tb.next 'USAGE:'
-    tb.push @spec.get_name if @spec.get_name
+    tb.next('USAGE:')
+    tb.push(@spec.get_name) if @spec.get_name
 
     if @spec.get_opts.values.uniq.length < 5 || @spec.option_listing
       @spec.get_opts.values.uniq.each do |opt|
-        tb.push "[#{opt.header}]"
+        tb.push("[#{opt.header}]")
       end
     else
-      tb.push '[OPTION...]'
+      tb.push('[OPTION...]')
     end
 
     if @spec.has_args?
@@ -146,9 +146,9 @@ class Interface
           end
           name.upcase
         end
-        tb.push singles
+        tb.push(singles)
         v = @spec.get_variad.name.upcase
-        tb.push "[#{v}1 #{v}2...]"
+        tb.push("[#{v}1 #{v}2...]")
       else
         argmap = @spec.get_args.values.map do |a|
           name = a.name
@@ -157,32 +157,28 @@ class Interface
           end
           name.upcase
         end
-        tb.push argmap
+        tb.push(argmap)
       end
     end
 
-    tb.wrap indent: 7, indent_after: true, segments: true
+    tb.wrap(indent: 7, indent_after: true, segments: true)
 
     if @spec.get_desc
-      tb.skip @spec.get_desc
+      tb.skip(@spec.get_desc)
       tb.wrap(indent: 4)
     end
 
-    tb.skip 'OPTIONS:'
-    tb.skip
+    tb.skip('OPTIONS:').skip
 
     @spec.get_opts.values.uniq.each do |opt|
-      tb.indent 4
-      tb.push opt.header
+      tb.indent(4).push(opt.header)
       if opt.desc
-        tb.next
-        tb.indent 8
-        tb.push opt.desc
+        tb.next.indent(8).push(opt.desc)
       end
       tb.skip
     end
 
-    return tb.print
+    return tb.to_s
   end
 
   # Print usage information and exit

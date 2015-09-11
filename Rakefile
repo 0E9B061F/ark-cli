@@ -1,17 +1,11 @@
 require 'rubygems/package_task'
 require 'rdoc/task'
 
-v = `git describe --tags`.strip.tr('-', '.')
-c = 2 - v.count('.')
-if c > 0
-  v = v + ('.0' * c)
-else
-  v.sub!(/\.[^\.]+$/, '')
-end
-if !`git status --porcelain`.empty?
-  v = v + '.dev'
-end
-Version = v
+require 'ark/utility'
+
+
+Version     = Ark::Git.version
+VersionLine = Ark::Git.version_line
 
 spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
@@ -35,7 +29,7 @@ end
 
 desc "Print the version for the current revision"
 task :version do
-  puts Version
+  puts VersionLine
 end
 
 desc "Open an IRB session with the library already require'd"
@@ -72,7 +66,7 @@ end
 Rake::RDocTask.new do |rd|
   rd.main       = 'README.md'
   rd.rdoc_dir   = 'doc'
-  rd.title      = "ark-cli #{Version} Documentation"
+  rd.title      = "#{VersionLine} Documentation"
   rd.rdoc_files.include("README.md", "lib/ark/cli.rb", *Dir['lib/ark/cli/*'])
 end
 

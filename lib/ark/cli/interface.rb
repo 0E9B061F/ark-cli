@@ -32,7 +32,10 @@ class Interface
     @input = input
     @spec = Spec.new
     yield @spec
-    @spec.opt :help, :h, desc: "Print usage information"
+    @spec.opt :help, :h, desc: "Print usage information and exit"
+    if @spec.get_version
+      @spec.opt :version, :V, desc: "Print version information and exit"
+    end
     self.parse
   end
 
@@ -110,7 +113,11 @@ class Interface
     @report = Report.new(args, named, trailing, options, counts)
 
     if @report.opt(:help)
-      self.print_usage()
+      self.print_usage
+    end
+
+    if @report.opt(:version)
+      self.print_version
     end
 
     unless @spec.get_args.values.all? {|arg| arg.fulfilled? }
@@ -182,8 +189,13 @@ class Interface
   end
 
   # Print usage information and exit
-  def print_usage()
+  def print_usage
     puts self.usage
+    exit 0
+  end
+
+  def print_version
+    puts @spec.get_version
     exit 0
   end
 

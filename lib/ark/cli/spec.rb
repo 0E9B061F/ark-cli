@@ -46,6 +46,11 @@ class Spec
     return @arguments
   end
 
+  # Get version information defined for this spec
+  def get_version
+    return @version
+  end
+
   # Return +true+ if this interface has any options defined for it
   def has_options?
     @options.values.uniq.length > 1
@@ -93,10 +98,12 @@ class Spec
   # [+name+] Name of the program
   # [+desc+] Short description of the program
   # [+args+] A list of named arguments
-  def header(name: nil, desc: nil, args: [])
+  # [+version+] Current version information for the program
+  def header(name: nil, desc: nil, args: [], version: nil)
     self.name(name)
     self.desc(desc)
     self.args(args)
+    self.version(version)
   end
 
   # Set the name of the program to +str+
@@ -126,6 +133,11 @@ class Spec
       end
       @arguments[arg.name] = arg
     end
+  end
+
+  # Set the version information for the program to +str+
+  def version(str)
+    @version = str.to_s if str
   end
 
   # Define an Option

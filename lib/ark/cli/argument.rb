@@ -1,4 +1,4 @@
-module Ark # :nodoc:
+module ARK # :nodoc:
 module CLI
 
 # Represents an argument, either to the program itself or for options which
@@ -123,5 +123,5 @@ class Argument
 end
 
 end # module CLI
-end # module Ark
+end # module ARK
 

@@ -1,4 +1,4 @@
-module Ark # :nodoc:
+module ARK # :nodoc:
 module CLI
 
 # Main class for ark-cli. Defines a +Spec+, parses the command line and returns
@@ -202,5 +202,5 @@ class Interface
 end # class Interface
 
 end # module CLI
-end # module Ark
+end # module ARK
 

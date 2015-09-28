@@ -1,4 +1,4 @@
-module Ark # :nodoc:
+module ARK # :nodoc:
 module CLI
 
 # The +Spec+ class defines the properties of an interface, namely its expected
@@ -169,5 +169,5 @@ class Spec
 end
 
 end # module CLI
-end # module Ark
+end # module ARK
 

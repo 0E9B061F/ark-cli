@@ -1,4 +1,4 @@
-module Ark # :nodoc:
+module ARK # :nodoc:
 module CLI
 
 # Stores information parsed from the command line for later inspection
@@ -44,5 +44,5 @@ class Report
 end
 
 end # module CLI
-end # module Ark
+end # module ARK
 

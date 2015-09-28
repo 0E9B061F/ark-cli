@@ -15,8 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-require 'ark/utility'
-include Ark::Log
+require 'ark/util'
+include ARK::Log
 
 require_relative 'cli/argument.rb'
 require_relative 'cli/option.rb'
@@ -25,7 +25,7 @@ require_relative 'cli/spec.rb'
 require_relative 'cli/report.rb'
 
 
-module Ark # :nodoc:
+module ARK # :nodoc:
 
 # A library for handling options and arguments from the command line.
 #
@@ -45,5 +45,5 @@ module CLI
   end
 end
 
-end # module Ark
+end # module ARK
 

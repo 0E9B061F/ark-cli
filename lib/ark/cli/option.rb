@@ -1,4 +1,4 @@
-module Ark # :nodoc:
+module ARK # :nodoc:
 module CLI
 
 # Represents an option and stores the option's current state, as well as
@@ -107,5 +107,5 @@ end
 
 
 end # module CLI
-end # module Ark
+end # module ARK
 

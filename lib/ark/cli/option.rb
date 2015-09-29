@@ -58,11 +58,15 @@ class Option
   # a option with expected arguments will raise an error.
   def toggle()
     if self.flag?
-      @count += 1
+      self.increment
       @flag = true
     else
       raise StandardError, "Tried to toggle an option which expects an argument"
     end
+  end
+
+  def increment()
+    @count += 1
   end
 
   # Pass an argument to this option

@@ -70,6 +70,8 @@ class Interface
               elsif opt.flag?
                 opt.toggle()
                 dbg "Toggled flag '#{opt}'", 1
+              else
+                opt.increment
               end
             end
           elsif word[/^--/]
@@ -80,6 +82,8 @@ class Interface
             if opt.flag?
               opt.toggle()
               dbg "Toggled #{opt}", 1
+            else
+              opt.increment
             end
           end
         else

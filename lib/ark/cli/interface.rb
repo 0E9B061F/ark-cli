@@ -53,7 +53,7 @@ class Interface
 
     @input.each do |word|
       dbg "Parsing '#{word}'"
-      if word == '--'
+      if taking_options && word == '--'
         taking_options = false
       elsif last_opt && last_opt.has_args? && !last_opt.full? && taking_options
         dbg "Got argument '#{word}' for '#{last_opt}'", 1

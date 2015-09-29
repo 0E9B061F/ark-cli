@@ -105,6 +105,9 @@ class Interface
     end
 
     @spec.get_opts.each do |name, opt|
+      unless opt.fulfilled?
+        raise InterfaceError, "Option #{opt} is missing required arguments"
+      end
       options[name] = opt.value
       counts[name]  = opt.count
     end

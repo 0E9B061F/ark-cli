@@ -38,13 +38,21 @@ class Option
     return @args.length
   end
 
-  # True if this option has received all the arguments it expects, or if this
-  # option expects no arguments
+  # True only if all arguments have been given, including optional arguments
   def full?
     if self.flag?
       return true
     else
       return (@args.length - @arg_index) < 1
+    end
+  end
+
+  # True if all required arguments for this option have been given
+  def fulfilled?
+    if self.flag?
+      return true
+    else
+      return @args.all?(&:fulfilled?)
     end
   end
 

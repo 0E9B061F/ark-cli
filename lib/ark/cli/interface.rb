@@ -113,6 +113,9 @@ class Interface
     end
 
     @spec.get_args.each do |name, arg|
+      unless arg.fulfilled?
+        raise InterfaceError, "Required argument '#{name.upcase}' was not given."
+      end
       args << arg.value
       named[name] = arg.value
     end
@@ -127,10 +130,6 @@ class Interface
 
     if @report.opt(:version)
       self.print_version
-    end
-
-    unless @spec.get_args.values.all? {|arg| arg.fulfilled? }
-      raise InterfaceError, "Required argument '#{name.upcase}' was not given."
     end
 
     if @spec.trailing_error && !@report.trailing.empty?

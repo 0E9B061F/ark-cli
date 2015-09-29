@@ -58,7 +58,9 @@ class Interface
         last_opt.push(word)
       else
         if word[/^-/] && taking_options
-          if word[/^-[^-]/]
+          if word == '--'
+            taking_options = false
+          elsif word[/^-[^-]/]
             dbg "Identified short option(s)", 1
             shorts = word[/[^-]+$/].split('')
             shorts.each_with_index do |short, i|

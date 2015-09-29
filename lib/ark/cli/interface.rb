@@ -53,14 +53,14 @@ class Interface
 
     @input.each do |word|
       dbg "Parsing '#{word}'"
-      if last_opt && last_opt.has_args? && !last_opt.full?
+      if word == '--'
+        taking_options = false
+      elsif last_opt && last_opt.has_args? && !last_opt.full? && taking_options
         dbg "Got argument '#{word}' for '#{last_opt}'", 1
         last_opt.push(word)
       else
         if word[/^-/] && taking_options
-          if word == '--'
-            taking_options = false
-          elsif word[/^-[^-]/]
+          if word[/^-[^-]/]
             dbg "Identified short option(s)", 1
             shorts = word[/[^-]+$/].split('')
             shorts.each_with_index do |short, i|

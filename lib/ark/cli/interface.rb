@@ -75,6 +75,7 @@ class Interface
               else
                 opt.increment
               end
+              opt.specified
             end
           elsif word[/^--/]
             dbg "Identified long option", 1
@@ -87,6 +88,7 @@ class Interface
             else
               opt.increment
             end
+            opt.specified
           end
         else
           dbg "Parsed output arg", 1
@@ -105,7 +107,7 @@ class Interface
     end
 
     @spec.get_opts.each do |name, opt|
-      unless opt.fulfilled?
+      if opt.specified? && !opt.fulfilled?
         raise InterfaceError, "Option #{opt} is missing required arguments"
       end
       options[name] = opt.value

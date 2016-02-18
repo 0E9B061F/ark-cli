@@ -17,6 +17,7 @@ class Option
     @count     = 0
     @desc      = desc || ''
     @arg_index = 0
+    @specified = false
   end
 
   # A count of how many times this option has been given on the command line.
@@ -45,6 +46,14 @@ class Option
     else
       return (@args.length - @arg_index) < 1
     end
+  end
+
+  def specified?
+    @specified
+  end
+
+  def specified
+    @specified = true
   end
 
   # True if all required arguments for this option have been given

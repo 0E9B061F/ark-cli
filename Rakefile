@@ -1,11 +1,11 @@
 require 'rubygems/package_task'
 require 'rdoc/task'
 
-require 'ark/utility'
+require 'ark/util'
 
 
-Version     = Ark::Git.version
-VersionLine = Ark::Git.version_line
+Version     = ARK::Git.version
+VersionLine = ARK::Git.version_line
 
 spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY

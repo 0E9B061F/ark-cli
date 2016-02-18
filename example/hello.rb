@@ -7,7 +7,7 @@ require 'ark/cli'
 
 
 # Define and parse the commandline interface by calling Ark::CLI#begin
-r = Ark::CLI.report do |s|
+r = ARK::CLI.report do |s|
 
   # Define the name of the program, its arguments and a description
   s.name 'hello.rb'
